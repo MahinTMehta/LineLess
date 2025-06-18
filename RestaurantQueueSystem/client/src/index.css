@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(20, 14.3%, 4.1%);
+  --muted: hsl(60, 4.8%, 95.9%);
+  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(20, 14.3%, 4.1%);
+  --border: hsl(20, 5.9%, 90%);
+  --input: hsl(20, 5.9%, 90%);
+  --primary: hsl(16, 100%, 60%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(208, 22%, 31%);
+  --secondary-foreground: hsl(60, 9.1%, 97.8%);
+  --accent: hsl(142, 55%, 44%);
+  --accent-foreground: hsl(60, 9.1%, 97.8%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(20, 14.3%, 4.1%);
+  --radius: 0.5rem;
+  
+  /* Custom TableQ colors */
+  --tableq-primary: hsl(16, 100%, 60%);
+  --tableq-secondary: hsl(208, 22%, 31%);
+  --tableq-accent: hsl(142, 55%, 44%);
+  --tableq-warning: hsl(45, 100%, 51%);
+  --tableq-error: hsl(355, 78%, 56%);
+  --tableq-info: hsl(195, 80%, 44%);
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(16, 100%, 60%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  .font-heading {
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  .text-primary-custom {
+    color: #FF6B35;
+  }
+  
+  .text-secondary-custom {
+    color: #2C3E50;
+  }
+  
+  .text-accent-custom {
+    color: #27AE60;
+  }
+  
+  .text-warning-custom {
+    color: #FFC107;
+  }
+  
+  .text-error-custom {
+    color: #DC3545;
+  }
+  
+  .text-info-custom {
+    color: #17A2B8;
+  }
+  
+  .bg-primary-custom {
+    background-color: #FF6B35;
+  }
+  
+  .bg-secondary-custom {
+    background-color: #2C3E50;
+  }
+  
+  .bg-accent-custom {
+    background-color: #27AE60;
+  }
+  
+  .bg-warning-custom {
+    background-color: #FFC107;
+  }
+  
+  .bg-error-custom {
+    background-color: #DC3545;
+  }
+  
+  .bg-info-custom {
+    background-color: #17A2B8;
+  }
+  
+  .border-primary-custom {
+    border-color: #FF6B35;
+  }
+  
+  .hover\:bg-orange-600:hover {
+    background-color: rgb(234 88 12);
+  }
+  
+  .hover\:bg-green-600:hover {
+    background-color: rgb(22 163 74);
+  }
+}

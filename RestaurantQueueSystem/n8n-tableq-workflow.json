@@ -1,0 +1,180 @@
+{
+  "name": "TableQ Restaurant Queue Management",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tableq-webhook",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-node",
+      "name": "TableQ Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [180, 300],
+      "webhookId": "tableq-queue-webhook"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "your-google-sheet-id",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Queues",
+          "mode": "name"
+        },
+        "columnToMatchOn": "A",
+        "valueInputMode": "defineBelow",
+        "values": {
+          "Restaurant": "={{ $json.restaurant }}",
+          "User Email": "={{ $json.email }}",
+          "Party Size": "={{ $json.party_size }}",
+          "Join Time": "={{ $json.join_time }}",
+          "Status": "Waiting",
+          "ETA": "={{ DateTime.fromISO($json.join_time).plus({minutes: 45}).toISO() }}"
+        },
+        "options": {
+          "cellFormat": "USER_ENTERED",
+          "useAppend": true
+        }
+      },
+      "id": "google-sheets-node",
+      "name": "Add to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [400, 200],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "google-sheets-credentials",
+          "name": "Google Sheets OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "tableq.notifications@gmail.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "TableQ: You're in line at {{ $('TableQ Webhook').item.json.restaurant }}!",
+        "emailType": "html",
+        "message": "<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"utf-8\">\n    <title>TableQ Queue Confirmation</title>\n</head>\n<body style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8f9fa;\">\n    <div style=\"background-color: #FF6B35; color: white; padding: 20px; text-align: center;\">\n        <h1 style=\"margin: 0; font-size: 28px;\">🍽️ TableQ</h1>\n        <h2 style=\"margin: 10px 0 0 0; font-size: 20px;\">You're in the queue!</h2>\n    </div>\n    \n    <div style=\"background-color: white; padding: 30px; margin: 0;\">\n        <p style=\"color: #2C3E50; font-size: 16px; margin: 0 0 20px 0;\">Hi {{ $('TableQ Webhook').item.json.name }},</p>\n        \n        <p style=\"color: #2C3E50; font-size: 16px; margin: 0 0 20px 0;\">Great news! You've successfully joined the queue at <strong>{{ $('TableQ Webhook').item.json.restaurant }}</strong>.</p>\n        \n        <div style=\"background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #FF6B35;\">\n            <h3 style=\"color: #2C3E50; margin: 0 0 15px 0; font-size: 18px;\">Queue Details:</h3>\n            <table style=\"width: 100%; border-collapse: collapse;\">\n                <tr>\n                    <td style=\"padding: 8px 0; color: #2C3E50; font-weight: bold;\">Restaurant:</td>\n                    <td style=\"padding: 8px 0; color: #2C3E50;\">{{ $('TableQ Webhook').item.json.restaurant }}</td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 8px 0; color: #2C3E50; font-weight: bold;\">Party Size:</td>\n                    <td style=\"padding: 8px 0; color: #2C3E50;\">{{ $('TableQ Webhook').item.json.party_size }} people</td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 8px 0; color: #2C3E50; font-weight: bold;\">Join Time:</td>\n                    <td style=\"padding: 8px 0; color: #2C3E50;\">{{ DateTime.fromISO($('TableQ Webhook').item.json.join_time).toFormat('h:mm a') }}</td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 8px 0; color: #2C3E50; font-weight: bold;\">Estimated Wait:</td>\n                    <td style=\"padding: 8px 0; color: #27AE60; font-weight: bold;\">45 minutes</td>\n                </tr>\n                <tr>\n                    <td style=\"padding: 8px 0; color: #2C3E50; font-weight: bold;\">ETA:</td>\n                    <td style=\"padding: 8px 0; color: #27AE60; font-weight: bold;\">{{ DateTime.fromISO($('TableQ Webhook').item.json.join_time).plus({minutes: 45}).toFormat('h:mm a') }}</td>\n                </tr>\n            </table>\n        </div>\n        \n        <div style=\"background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0;\">\n            <h4 style=\"color: #27AE60; margin: 0 0 10px 0; font-size: 16px;\">What's Next?</h4>\n            <ul style=\"color: #2C3E50; margin: 0; padding-left: 20px;\">\n                <li style=\"margin-bottom: 8px;\">We'll send you updates as your turn approaches</li>\n                <li style=\"margin-bottom: 8px;\">Please arrive 5 minutes before your estimated time</li>\n                <li style=\"margin-bottom: 8px;\">Keep your phone handy for notifications</li>\n                <li>Show this email or mention your name when you arrive</li>\n            </ul>\n        </div>\n        \n        <div style=\"text-align: center; margin: 30px 0;\">\n            <a href=\"#\" style=\"background-color: #27AE60; color: white; padding: 15px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;\">Check Queue Status</a>\n        </div>\n    </div>\n    \n    <div style=\"background-color: #2C3E50; color: white; padding: 20px; text-align: center;\">\n        <p style=\"margin: 0; color: #bdc3c7;\">TableQ - Skip the Wait, Enjoy Your Meal</p>\n        <p style=\"margin: 5px 0 0 0; font-size: 12px; color: #95a5a6;\">This is an automated message. Please do not reply to this email.</p>\n    </div>\n</body>\n</html>",
+        "options": {
+          "allowUnauthorizedCerts": false
+        }
+      },
+      "id": "email-node",
+      "name": "Send Confirmation Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [400, 400],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-credentials",
+          "name": "SMTP Email Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": \"Successfully added to queue\",\n  \"data\": {\n    \"id\": {{ $('Add to Google Sheets').item.json.updatedRows || 1 }},\n    \"name\": \"{{ $('TableQ Webhook').item.json.name }}\",\n    \"email\": \"{{ $('TableQ Webhook').item.json.email }}\",\n    \"restaurant\": \"{{ $('TableQ Webhook').item.json.restaurant }}\",\n    \"party_size\": {{ $('TableQ Webhook').item.json.party_size }},\n    \"join_time\": \"{{ $('TableQ Webhook').item.json.join_time }}\",\n    \"status\": \"Waiting\",\n    \"eta\": \"{{ DateTime.fromISO($('TableQ Webhook').item.json.join_time).plus({minutes: 45}).toISO() }}\",\n    \"estimated_wait\": \"45 minutes\",\n    \"queue_position\": {{ $('Add to Google Sheets').item.json.updatedRows || 1 }}\n  }\n}",
+        "options": {}
+      },
+      "id": "webhook-response-node",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [620, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Calculate queue position and format data\nconst inputData = $input.all();\nconst webhookData = inputData[0].json;\n\n// Generate a simple queue position (in real implementation, this would query existing data)\nconst queuePosition = Math.floor(Math.random() * 5) + 1;\n\n// Format restaurant name for display\nconst restaurantNames = {\n  'bella-vista': 'Bella Vista Italian',\n  'sakura-sushi': 'Sakura Sushi',\n  'prime-steakhouse': 'Prime Steakhouse',\n  'garden-bistro': 'Garden Bistro'\n};\n\nconst restaurantDisplay = restaurantNames[webhookData.restaurant] || webhookData.restaurant;\n\n// Calculate ETA\nconst joinTime = new Date(webhookData.join_time);\nconst eta = new Date(joinTime.getTime() + (45 * 60 * 1000)); // Add 45 minutes\n\n// Return formatted data\nreturn {\n  ...webhookData,\n  restaurant_display: restaurantDisplay,\n  queue_position: queuePosition,\n  eta_formatted: eta.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),\n  eta_iso: eta.toISOString(),\n  estimated_wait: '45 minutes'\n};"
+      },
+      "id": "data-processing-node",
+      "name": "Process Queue Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [300, 300]
+    }
+  ],
+  "connections": {
+    "TableQ Webhook": {
+      "main": [
+        [
+          {
+            "node": "Process Queue Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Queue Data": {
+      "main": [
+        [
+          {
+            "node": "Add to Google Sheets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Confirmation Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Confirmation Email": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "timezone": "America/New_York"
+  },
+  "versionId": "1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "tableq-workflow",
+  "tags": [
+    {
+      "createdAt": "2024-01-15T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z",
+      "id": "restaurant",
+      "name": "restaurant"
+    },
+    {
+      "createdAt": "2024-01-15T00:00:00.000Z", 
+      "updatedAt": "2024-01-15T00:00:00.000Z",
+      "id": "queue",
+      "name": "queue"
+    }
+  ]
+}
